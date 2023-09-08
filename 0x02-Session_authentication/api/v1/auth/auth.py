@@ -1,49 +1,38 @@
 #!/usr/bin/env python3
-""" Module of Authentication
-"""
+"""Authenticatin file"""
 from flask import request
 from typing import List, TypeVar
+User = TypeVar('User')
 
 
 class Auth:
-    """ Class to manage the API authentication """
+    """class managing API authentication"""
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """ Method for validating if endpoint requires auth """
-        if path is None or excluded_paths is None or excluded_paths == []:
+        """returns False - path and excluded_paths"""
+        check = path
+        if path is None or excluded_paths is None or len(excluded_paths) == 0:
             return True
+        if path[-1] != "/":
+            check += "/"
+        if check in excluded_paths or path in excluded_paths:
+            return False
+        return True
 
-        l_path = len(path)
-        if l_path == 0:
-            return True
-
-        slash_path = True if path[l_path - 1] == '/' else False
-
-        tmp_path = path
-        if not slash_path:
-            tmp_path += '/'
-
-        for exc in excluded_paths:
-            l_exc = len(exc)
-            if l_exc == 0:
-                continue
-
-            if exc[l_exc - 1] != '*':
-                if tmp_path == exc:
-                    return False
+        for i in excluded_paths:
+            if i[len(i) - 1] != '*':
+                return False
             else:
-                if exc[:-1] == path[:l_exc - 1]:
+                if i[:-1] == path[:len(i) - 1]:
                     return False
-
         return True
 
     def authorization_header(self, request=None) -> str:
-        """ Method that handles authorization header """
+        """returns None - request will be the Flask request object"""
         if request is None:
             return None
-
-        return request.headers.get("Authorization", None)
+        return request.headers.get("Authorization")
 
     def current_user(self, request=None) -> TypeVar('User'):
-        """ Validates current user """
+        """returns none"""
         return None
